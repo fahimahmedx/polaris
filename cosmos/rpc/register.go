@@ -32,5 +32,6 @@ func RegisterJSONRPCServer(ctx client.Context, rtr *mux.Router, provider Provide
 	cfg := provider.GetConfig()
 	rtr.PathPrefix(cfg.BaseRoute).Handler(provider.GetHTTP())
 	rtr.PathPrefix(cfg.BaseRoute + "/ws").Handler(provider.GetWS())
+	rtr.PathPrefix(cfg.BaseRoute + "/graphql").Handler(provider.GetGraphQL())
 	provider.SetClientContext(ctx)
 }

@@ -32,6 +32,7 @@ type Service interface {
 	RegisterAPIs(extraAPIs func(PolarisBackend) []API) error
 	GetHTTP() *Server
 	GetWS() *Server
+	GetGraphQL() *Server
 	GetConfig() *config.Server
 }
 
@@ -46,6 +47,8 @@ type service struct {
 	http *Server
 	// ws is the externally facing JSON-RPC Server.
 	ws *Server
+	// graphql is the externally facing JSON-RPC Server.
+	graphql *Server
 }
 
 // New returns a new `Service` object.
@@ -55,13 +58,14 @@ func NewService(cfg *config.Server) Service {
 		config:  cfg,
 		http:    NewServer(),
 		ws:      NewServer(),
+		graphql: NewServer(),
 	}
 }
 
 // RegisterAPIs registers the JSON-RPC APIs with the API service.
 func (s *service) RegisterAPIs(extraAPIs func(PolarisBackend) []API) error {
 	apis := append(GetAPIs(s.backend), extraAPIs(s.backend)...)
-	for _, srv := range []*Server{s.http, s.ws} {
+	for _, srv := range []*Server{s.http, s.ws, s.graphql} {
 		if err := node.RegisterApis(apis, s.config.EnabledAPIs, srv); err != nil {
 			return err
 		}
@@ -87,4 +91,9 @@ func (s *service) GetHTTP() *Server {
 // GetWS returns the WS server.
 func (s *service) GetWS() *Server {
 	return s.ws
+}
+
+// GetWS returns the GraphQL server.
+func (s *service) GetGraphQL() *Server {
+	return s.graphql
 }
